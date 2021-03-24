@@ -19,39 +19,48 @@ def visitor_page():
     item_id = request.form.get("item_id")
     #user_id = request.args.get('user_id')
     print("here")
-    print(type(user_id))
-    print(item_id)
+    
 
     admin_role1 = db.session.query(user_age_groups ).filter_by(user_id = user_id).first()
     admin_role2 = db.session.query(content_topics ).filter_by(item_id = item_id).first()
-    if admin_role1 and admin_role2:
-        admin_role1 = db.session.query(user_age_groups ).filter_by(user_id = user_id).first()
+    print(admin_role1)
+    if  admin_role1 != None and admin_role2 != None: 
+        ITID = db.session.query(content_age_groups).filter_by(age_group_id  = admin_role1.age_group_id).first().item_id
         admin_role2 = db.session.query(content_topics ).filter_by(item_id = item_id).first()
-        print(admin_role1.age_group_id)
-        print(admin_role2.topic_id)
-        print(admin_role2.item_id)
-        print(type(admin_role1.user_id))
-
-        if admin_role1.user_id ==int(user_id) and admin_role2.item_id ==int(item_id)  :
-            print ("in count")
-            v = db.session.query(visitor_data).filter_by(user_id = user_id).first()
-            if not v:
-                me = visitor_data(user_id =admin_role1.user_id ,item_id = admin_role2.item_id, visit_count = 1 )
-                db.session.add(me)
-                db.session.commit()
-            else:
-                print(v.visit_count)    
-                me = visitor_data(user_id =admin_role1.user_id ,item_id = admin_role2.item_id,visit_count = 1 )
-                v.visit_count += 1
-                db.session.add(v)
-                db.session.commit()
+        print("here item id is ",ITID)
+        print("here user id is ",admin_role1.user_id)
+        if admin_role2.item_id == ITID and admin_role1 and admin_role2:
             
+            admin_role1 = db.session.query(user_age_groups ).filter_by(user_id = user_id).first()
+            admin_role2 = db.session.query(content_topics ).filter_by(item_id = item_id).first()
+            print(admin_role1.age_group_id)
+            print(admin_role2.topic_id)
+            print(admin_role2.item_id)
+            print(type(admin_role1.user_id))
 
-        rows = visitor_data.query.all()
-        return render_template("public/list.html",rows = rows) 
+            if admin_role1.user_id ==int(user_id) and admin_role2.item_id ==int(item_id)  :
+                print ("in count")
+                v = db.session.query(visitor_data).filter_by(user_id = user_id).first()
+                if not v:
+                    me = visitor_data(user_id =admin_role1.user_id ,item_id = admin_role2.item_id, visit_count = 1 )
+                    db.session.add(me)
+                    db.session.commit()
+                else:
+                    print(v.visit_count)    
+                    me = visitor_data(user_id =admin_role1.user_id ,item_id = admin_role2.item_id,visit_count = 1 )
+                    v.visit_count += 1
+                    db.session.add(v)
+                    db.session.commit()
+                
+
+            rows = visitor_data.query.all()
+            return render_template("public/list.html",rows = rows) 
+        else:
+                return make_response(jsonify({'error': 'No ID matched'}), 404)
+
     else:
-            return make_response(jsonify({'error': 'No ID matched'}), 404)
-        
+                return make_response(jsonify({'error': 'No ID matched'}), 404) 
+
 @app.route('/content_ids', methods=["GET","POST"])
 def content_ids():
     return render_template('public/content.html')
